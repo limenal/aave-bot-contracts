@@ -145,9 +145,13 @@ contract Redeposit is Ownable{
     function deposit(address token, uint256 amount, address user) public {
         require(amount > 0);
         uint256 amountToDeposit;
-        if(totalDeposits != 0)
+        if(currentDeposit[user] > 0)
         {
-           distributeUSD(); 
+            withdrawToContract(user);
+        }
+        if(totalDeposits>0)
+        {
+            distributeUSD(); 
         }
         
         if(token != currentToken)
@@ -162,9 +166,7 @@ contract Redeposit is Ownable{
                 IERC20(token).safeApprove(quickswapRouter, uint(-1));
             }
             IUniswapV2Router01(quickswapRouter).swapExactTokensForTokens(amount, 0, path, address(this), now.add(600));
-            
             amountToDeposit = IERC20(currentToken).balanceOf(address(this));
-            
             ILendingPool(pool).deposit(currentToken, amountToDeposit, address(this), 0);
 
         }
@@ -172,7 +174,6 @@ contract Redeposit is Ownable{
             IERC20(currentToken).safeTransferFrom(user, address(this), amount);
             amountToDeposit = IERC20(currentToken).balanceOf(address(this));
             ILendingPool(pool).deposit(currentToken, amountToDeposit, address(this), 0);
-            totalDeposits = totalDeposits.add(amountToDeposit);
             
         }
         currentDeposit[user] = amountToDeposit;
