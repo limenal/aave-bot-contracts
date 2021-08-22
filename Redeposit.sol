@@ -100,7 +100,7 @@ contract Redeposit is Ownable{
      * @dev Sets new contract token
      */
     function setMaxToken(address newToken, address newAaveToken) external onlyOwner{
-        require(newToken != currentToken);
+        require(newToken != currentToken && totalDeposits > 0);
         uint256 quickswapAllowance = IERC20(newToken).allowance(address(this), quickswapRouter);
         if(quickswapAllowance == 0)
         {
@@ -176,7 +176,6 @@ contract Redeposit is Ownable{
             ILendingPool(pool).deposit(currentToken, amountToDeposit, address(this), 0);
             
         }
-        currentDeposit[user] = amountToDeposit;
         // We want to store deposits in same decimals
         if(currentDecimals == 18)
         {
@@ -216,6 +215,8 @@ contract Redeposit is Ownable{
         totalDeposits = totalDeposits.sub(deposited);
         totalDepositsNonNormalized = totalDepositsNonNormalized.sub(currentDeposit[to]);
         sumOfPreviousRewards = sumOfPreviousRewards.sub(reward);
+        currentDeposit[to] = 0;
+
     }
     /**
      * @dev Distributes USD rewards 
