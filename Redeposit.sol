@@ -247,7 +247,6 @@ contract Redeposit is Ownable{
         
         ILendingPool(pool).deposit(currentToken, amountToDeposit, address(this), 0);
         
-        sumOfPreviousRewards = sumOfPreviousRewards.add(amountToDeposit);
         sumOfRewards = sumOfRewards.add(uint256(1 ether).mul(amountToDeposit).div(totalDeposits));
     }
     
